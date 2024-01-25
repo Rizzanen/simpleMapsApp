@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Alert,
   Keyboard,
@@ -9,15 +9,29 @@ import {
   View,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
+import * as Location from "expo-location";
 
 export default function App() {
   const [address, setAddress] = useState("");
   const [coordinates, setCoordinates] = useState({
-    latitude: 60.200692,
-    longitude: 24.934302,
     latitudeDelta: 0.0322,
     longitudeDelta: 0.0221,
   });
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("No permission to get location");
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({});
+      setCoordinates({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    })();
+  }, []);
 
   const handleInputChange = (text) => {
     setAddress(text);
